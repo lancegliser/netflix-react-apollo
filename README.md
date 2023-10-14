@@ -1,6 +1,6 @@
-# React Example
+# Netflix React Example
 
-> Provides a working React App integrated with a GraphQL server via Apollo client
+> Provides a working React App integrated with a GraphQL server via Apollo client.
 
 ## Upstream v1.2.0
 
@@ -10,12 +10,17 @@ git remote add upstream git@github.com:lancegliser/react-apollo.git
 
 ## Topics
 
-- Client configuration ✅
-- Codegen ✅
-- Immediate ✅ and lazy queries ✅
-- Namespaces ✅
-- Pagination strategies: Independent ✅, field ✅, read and merge ✅
-- Mutations: Basics ✅, Optimistic behaviors ✅, cache updates ✅, refetching ✅
+- Category fetching and shallow data examples
+- Movie fetch and deep data example
+- Carousel handling with [Flicking.js](https://naver.github.io/egjs-flicking/)
+- Growth animations and expanded details implementation
+  - Position via [Popper](https://popper.js.org/)
+  - CSS [`anchor` positioning](https://developer.chrome.com/blog/tether-elements-to-each-other-with-css-anchor-positioning/) future
+- Lazy loading
+  - [`loading="lazy"`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#loading) issues
+  - [`IntersectionObserver`](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) issues
+  - [`requestIdleCallback`](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback) issues
+  - Apollo caching issues
 
 ## Prerequisites
 
