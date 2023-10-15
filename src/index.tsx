@@ -1,5 +1,6 @@
 import React from "react";
 import "./index.css";
+import "./polyfills";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./AppRoutes";
 import { createRoot } from "react-dom/client";
