@@ -1,12 +1,9 @@
 import React from "react";
-import logo from "./logo.svg";
-import "./Home.css";
 import { Helmet } from "react-helmet-async";
 import { routeHomeTitle } from "./Router";
 import App from "../App/App";
 import { getMetaTitle } from "../../utils/meta";
-import { generateUsersSearchPath } from "../Users/Router";
-import { Link } from "react-router-dom";
+import { Card, CardContent, Link, Typography } from "@mui/material";
 
 const Page: React.FunctionComponent = () => {
   return (
@@ -15,20 +12,19 @@ const Page: React.FunctionComponent = () => {
         <title>{getMetaTitle([routeHomeTitle])}</title>
       </Helmet>
       <App>
-        <main className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload.
-          </p>
+        <Card sx={{ maxWidth: "66%", margin: "1rem auto 0" }}>
+          <CardContent>
+            <Typography gutterBottom>
+              Edit <code>src/App.tsx</code> and save to reload.
+            </Typography>
 
-          <Link className="App-link" to={usersPath}>
-            Learn React and Apollo client
-          </Link>
-        </main>
+            <Typography>
+              <Link href={"https://react.dev/"}>Learn React</Link>
+            </Typography>
+          </CardContent>
+        </Card>
       </App>
     </>
   );
 };
 export default Page;
-
-const usersPath = generateUsersSearchPath();
