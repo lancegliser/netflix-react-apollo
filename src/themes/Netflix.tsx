@@ -142,10 +142,7 @@ export const getTypography: (theme: Theme) => Theme["typography"] = (
   },
 });
 
-export const getComponents = (
-  theme: Theme,
-  additions: Theme["components"] = {},
-): Theme["components"] =>
+export const getComponents = (theme: Theme): Theme["components"] =>
   deepmerge(
     {},
     // inputColorOverrides,
