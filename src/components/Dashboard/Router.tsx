@@ -65,7 +65,7 @@ const generateContentUriQueryString = (
 };
 
 export const routeContentGenre: RouteObject = {
-  path: `/genre/:id`,
+  path: `genre/:id`,
   // async lazy() {
   //   const { default: Component } = await import("../Dashboard/Page");
   //   return {
