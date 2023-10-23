@@ -4,7 +4,7 @@ import CompactSuggestionController from "./CompactSuggestionController";
 import { ComponentProps } from "react";
 import { ComponentAnnotations } from "@storybook/types";
 import { Box } from "@mui/material";
-import { generateContentInfoUri } from "../../../Dashboard/Router";
+import { generateContentInfoUri } from "../../../Content/Router";
 import MovieIcon from "../../../Icons/IconMovie";
 
 type ControlArgs = {

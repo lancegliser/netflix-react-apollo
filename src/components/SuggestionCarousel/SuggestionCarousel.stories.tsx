@@ -7,7 +7,7 @@ import CompactSuggestionItem from "./components/CompactSuggestionItem/CompactSug
 import CompactSuggestionController, {
   CompactSuggestionControllerProps,
 } from "./components/CompactSuggestionController/CompactSuggestionController";
-import { generateContentInfoUri } from "../Dashboard/Router";
+import { generateContentInfoUri } from "../Content/Router";
 
 const controllerDefaults: CompactSuggestionControllerProps = {
   Primary: <>Phoenix, Arizona</>,

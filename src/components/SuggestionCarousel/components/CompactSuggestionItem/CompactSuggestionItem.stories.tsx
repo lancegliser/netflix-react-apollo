@@ -6,7 +6,7 @@ import type { ReactRenderer, StoryObj } from "@storybook/react";
 import CompactSuggestionItem, {
   CompactSuggestionItemProps,
 } from "./CompactSuggestionItem";
-import { generateContentInfoUri } from "../../../Dashboard/Router";
+import { generateContentInfoUri } from "../../../Content/Router";
 import { Box } from "@mui/material";
 import MovieIcon from "../../../Icons/IconMovie";
 

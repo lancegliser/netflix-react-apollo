@@ -2,7 +2,7 @@
 
 import type { Meta, StoryObj } from "@storybook/react";
 import FocusedSuggestion, { FocusedSuggestionProps } from "./FocusedSuggestion";
-import { generateContentInfoUri } from "../../../Dashboard/Router";
+import { generateContentInfoUri } from "../../../Content/Router";
 import { ApolloError } from "@apollo/client";
 import React from "react";
 import SaveControl from "../../../SaveControl/SaveControl";

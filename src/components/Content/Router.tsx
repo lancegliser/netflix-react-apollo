@@ -5,7 +5,7 @@ export const routeDashboardSearchTitle = "Content";
 export const routeContentInfo: RouteObject = {
   path: `item/:id`,
   // async lazy() {
-  //   const { default: Component } = await import("../Dashboard/Page");
+  //   const { default: Component } = await import("../Content/Page");
   //   return {
   //     Component,
   //   };
@@ -67,7 +67,7 @@ const generateContentUriQueryString = (
 export const routeContentGenre: RouteObject = {
   path: `genre/:id`,
   // async lazy() {
-  //   const { default: Component } = await import("../Dashboard/Page");
+  //   const { default: Component } = await import("../Content/Page");
   //   return {
   //     Component,
   //   };

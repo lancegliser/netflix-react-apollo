@@ -25,7 +25,7 @@ import {
   getSuggestionItemAnimationDuration,
   suggestionCarouselSizes,
 } from "../../SuggestionCarousel.constants";
-import { generateContentGenreUri } from "../../../Dashboard/Router";
+import { generateContentGenreUri } from "../../../Content/Router";
 import { SuggestionItemProps } from "../types";
 import { throttle } from "lodash";
 import { arrowWidth } from "../../../Carousel/components/CarouselArrow/CarouselArrow";

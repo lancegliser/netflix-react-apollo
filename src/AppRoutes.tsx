@@ -5,7 +5,7 @@ import AppProviders from "./AppProviders";
 import App from "./components/App/App";
 import { routeHome } from "./components/Home/Router";
 import RouteErrorPage from "./components/App/RouteErrorPage";
-import { contentRouter } from "./components/Dashboard/Router";
+import { contentRouter } from "./components/Content/Router";
 
 export const router = createBrowserRouter([
   {

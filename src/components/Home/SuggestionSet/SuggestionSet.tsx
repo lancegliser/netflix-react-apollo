@@ -5,7 +5,7 @@ import CompactSuggestionController, {
   CompactSuggestionControllerProps,
 } from "../../SuggestionCarousel/components/CompactSuggestionController/CompactSuggestionController";
 import { useSuggestionCount } from "../../SuggestionCarousel/hooks/useSuggestionCount";
-import { generateContentInfoUri } from "../../Dashboard/Router";
+import { generateContentInfoUri } from "../../Content/Router";
 import {
   ContentSuggestionsSet,
   ContentSuggestionsSetItemFieldsFragment,
