@@ -54,6 +54,7 @@ const meta: Meta<typeof FocusedSuggestion> = {
             displayName: displayName,
             displayImageUrl,
             genres: ["Horror", "Documentry"],
+            rating: 0.788,
           },
         },
       },

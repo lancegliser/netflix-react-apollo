@@ -208,7 +208,7 @@ const Ratings: FunctionComponent<RatingsProps> = ({ itemQuery }) => {
       value={typeof node?.rating === "number" ? node.rating * 5 : undefined}
       readOnly
       sx={[
-        {
+        itemQuery.loading && {
           // https://github.com/mui/material-ui/blob/master/packages/mui-material/src/Skeleton/Skeleton.js
           "& .MuiRating-icon": {
             color: alpha(

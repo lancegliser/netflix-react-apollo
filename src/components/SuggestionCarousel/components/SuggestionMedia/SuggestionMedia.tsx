@@ -34,7 +34,8 @@ const SuggestionMedia: FunctionComponent<SuggestionMediaProps> = ({
       {(loading || displayImageUrl) && (
         <Box
           sx={{
-            background: alpha(theme.palette.background.paper, 0.7),
+            background: alpha(theme.palette.common.black, 0.7),
+            color: theme.palette.common.white,
             borderRadius: "50%",
             height: theme.spacing(3 * scale),
             left: padding,

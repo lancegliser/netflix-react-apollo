@@ -60,7 +60,7 @@ const SuggestionContent: FunctionComponent<SuggestionContentProps> = ({
           <Box
             sx={{
               "& > svg": {
-                background: theme.palette.background.paper,
+                background: theme.palette.common.black,
                 borderRadius: "50%",
                 height: theme.spacing(10 * scale),
                 padding: theme.spacing(1),
@@ -127,6 +127,7 @@ const SuggestionContentLine: FunctionComponent<SuggestionContentLineProps> = ({
       lineHeight={1.2}
       fontSize={`${1.125 * scale}rem !important`}
       fontWeight={primary ? 800 : undefined}
+      color={theme.palette.common.white}
       sx={{
         transition: theme.transitions.create(["font-size"], {
           duration,

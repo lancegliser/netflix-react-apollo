@@ -22,7 +22,7 @@ export type RouteDashboardSearchQueryParams = {};
 export const generateContentInfoUri: GenerateDashboardSearchPath = (params) => {
   const path = generatePath(
     [contentRouter.path, routeContentInfo.path].join("/"),
-    {},
+    params,
   );
   return generateContentUriQueryString(path);
 };
