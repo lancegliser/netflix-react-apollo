@@ -2,6 +2,23 @@ directive @auth(
   requires: AuthenticationRole = Authenticated
 ) on FIELD_DEFINITION | OBJECT
 
+type AccessRecord {
+  accessorId: String!
+
+  """
+  A UUID
+  """
+  id: ID!
+  objectId: String!
+  objectType: String!
+  operation: String!
+
+  """
+  ISO Format
+  """
+  timestamp: String!
+}
+
 """
 A base definition authentication actors. Customized from the auth-api generated types.
 """
@@ -61,6 +78,191 @@ type AuthenticationIdentity implements ICreated & IDisplayImage & IDisplayName &
 enum AuthenticationRole {
   Anonymous
   Authenticated
+}
+
+type Content {
+  """
+  Return a single item by id
+  """
+  item(id: ID!): ContentItem!
+
+  """
+  Return many items by ids
+  """
+  items(ids: [ID!]!): [ContentItem!]!
+
+  """
+  Returns items a user should consider viewing
+  """
+  suggestions(
+    """
+    The maximum number of results to return within each ContentSuggestionSet.
+    User devices or bandwidth preferences may dictate decreased volume.
+    """
+    limit: Int
+
+    """
+    The number of suggestions that will be preload in each set.
+    This will be used to preload `displayImageUrl` to improve performance if provided.
+    """
+    preload: Int
+
+    """
+    Some applications may require the last item to be preloaded, such as previewing reverse behaviors.
+    This will be used to preload `displayImageUrl` to improve performance if provided.
+    """
+    preloadLast: Boolean
+  ): ContentSuggestions!
+}
+
+enum ContentAccessOperation {
+  Read
+  Write
+}
+
+type ContentItem implements ICached & IDisplayImage & IDisplayName & IId {
+  """
+  ISO date time string for the time this resource was created
+  """
+  cachedAt: String
+
+  """
+  A value that can be included into <img src /> properties.
+  In some environments, this may be a base64 encoded data URL.
+  Do *not* request in mass across an entire search result.
+  """
+  displayImageUrl: String
+
+  """
+  A preformatted display name safe to display in HTML context
+  """
+  displayName: String!
+  format: ContentItemFormat!
+  genres: [String!]
+
+  """
+  The primary id for this type. Typically in the form of Contract/12887867.
+  """
+  id: ID!
+
+  """
+  A value between 0 and 1 representing the average rating across all users.
+  """
+  rating: Float
+
+  """
+  Defines if the current user has saved this item or not as stored by in the application layer
+  """
+  saved: SavedRecord
+  summary: String
+}
+
+enum ContentItemFormat {
+  Movie
+  Series
+}
+
+type ContentMutations {
+  """
+  Saves an object for the user to return to later.
+  """
+  addSavedItem(
+    """
+    The content's id
+    """
+    objectId: String!
+  ): SavedRecord!
+
+  """
+  Deletes a saved object for the user and returns it it existed
+  """
+  deleteSavedObject(
+    """
+    The SaveRecord's id
+    """
+    id: ID!
+  ): SavedRecord
+
+  """
+  A place holder allowing extension in other files
+  """
+  noop: Boolean @deprecated
+
+  """
+  Updates the access records for the current user and the identified object.
+  """
+  trackItemAccess(
+    objectId: String!
+    operation: ContentAccessOperation!
+  ): AccessRecord!
+}
+
+type ContentSuggestions {
+  """
+  Suggestion groups organized by specific scores for against a measurement inside a single source.
+  Visual priority: 4
+  """
+  dynamic: [ContentSuggestionsSet!]!
+
+  """
+  A hand curated selection of items for promotion in specialized display.
+  Items will be intermixed between sources.
+  Visual priority: 1
+  """
+  featured: ContentSuggestionsSet!
+
+  """
+  A hand curated selection of items for promotion in specialized display.
+  Items will be intermixed between sources.
+  Visual priority: 3
+  """
+  promoted: ContentSuggestionsSet!
+
+  """
+  A user specific select based on recent access.
+  Items will be intermixed between sources.
+  Visual priority: 2
+  """
+  recent: ContentSuggestionsSet!
+
+  """
+  A user specific selection of items.
+  Items will be intermixed between sources.
+  Visual priority: 2
+  """
+  saved: ContentSuggestionsSet!
+}
+
+type ContentSuggestionsItem implements IDisplayImage {
+  """
+  A public url name safe to display in any HTML context
+  A display image url may be supplied for some items in suggestions to provide a faster initial page load.
+  This will be based on the input parameters.
+  """
+  displayImageUrl: String
+  id: String!
+
+  """
+  If this item's fields were preloaded due to the query's initialDisplay argument
+  """
+  preloaded: Boolean!
+  primary: String!
+  secondary: String
+}
+
+type ContentSuggestionsSet implements IDisplayName {
+  """
+  A preformatted display name safe to display in HTML context
+  """
+  displayName: String
+  items: [ContentSuggestionsItem!]!
+}
+
+interface ICached {
+  """
+  ISO date time string for the time this resource was created
+  """
+  cachedAt: String
 }
 
 interface ICreated {
@@ -134,6 +336,8 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 scalar JSON
 
 type Mutation {
+  content: ContentMutations!
+
   """
   Provides name spaced users functionality
   """
@@ -141,6 +345,8 @@ type Mutation {
 }
 
 type Query {
+  content: Content!
+
   """
   A base definition authentication actors
   """
@@ -151,6 +357,25 @@ type Query {
   Provides name spaced users functionality
   """
   users: UsersQuery!
+}
+
+type SavedRecord implements ICreated & IId {
+  """
+  ISO date time string for the time this resource was created
+  """
+  createdAt: String!
+
+  """
+  Unique identifier for users that created this resource
+  """
+  createdBy: String!
+
+  """
+  The primary id for this type. Typically a UUID.
+  """
+  id: ID!
+  objectId: String!
+  objectType: String!
 }
 
 enum SortDirection {
@@ -215,7 +440,6 @@ type User implements ICreated & IDisplayName & IUpdated {
   Determines if a users is a service account supporting applications
   """
   isServiceAccount: Boolean
-  nickname: String
 
   """
   ISO date time string for the time this resource was created

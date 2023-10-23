@@ -9,29 +9,25 @@ import {
 import CompactSuggestionItem, {
   CompactSuggestionItemProps,
 } from "../CompactSuggestionItem/CompactSuggestionItem";
-import {
-  HaloSavedSourceObjectType,
-  Maybe,
-  useHaloAddSourceSavedObjectMutation,
-  useHaloConnectivityLazyQuery,
-  useHaloDeleteSourceSavedObjectMutation,
-  useHaloNodeDisplayImageUrlLazyQuery,
-  useHaloNodeLazyQuery,
-  useHaloSourcesQuery,
-} from "../../../../generated/types";
 import { Popper, useTheme } from "@mui/material";
 import { getSuggestionItemAnimationDuration } from "../../SuggestionCarousel.constants";
-import { sleep } from "../../../../utils/timing";
 import FocusedSuggestion, {
   FocusedSuggestionProps,
 } from "../FocusedSuggestion/FocusedSuggestion";
 import { SuggestionItemProps } from "../types";
-import { getHaloSourceGraphQLArgs } from "../../../../services/halo/halo";
 import SaveControl, {
   SaveControlProps,
 } from "../../../SaveControl/SaveControl";
 import { useSnackbar } from "notistack";
 import { SaveSnackbarProps } from "../../../SaveControl/components/SaveSnackbar";
+import {
+  Maybe,
+  useContentAddSavedObjectMutation,
+  useContentDeleteSavedObjectMutation,
+  useContentItemDisplayImageUrlLazyQuery,
+  useContentItemLazyQuery,
+} from "../../../../generated/types";
+import { sleep } from "../../../../utils/timing";
 
 export type CompactSuggestionControllerProps = SuggestionItemProps & {
   /**
@@ -39,9 +35,7 @@ export type CompactSuggestionControllerProps = SuggestionItemProps & {
    * This should be used for any items that couldn't be on the initial screen load.
    **/
   lazy?: CompactSuggestionItemProps["lazy"];
-  nodeId?: Maybe<string>;
-  sourceId?: string;
-  sourceUrl?: string;
+  id?: Maybe<string>;
 };
 /**
  * Provides property translation from query results,
@@ -65,12 +59,12 @@ const CompactSuggestionController: FunctionComponent<
   // img[loading=lazy] does nothing for you. So we'll instead use automatic firing and IntersectionObservers.
   // This will work because of the Apollo cache's merge of HaloNode by id and new properties.
   const [getNodeDisplayImage, nodeDisplayImageQuery] =
-    useHaloNodeDisplayImageUrlLazyQuery({
+    useContentItemDisplayImageUrlLazyQuery({
       fetchPolicy: "no-cache",
     });
 
   useEffect(() => {
-    if (!props.nodeId || !props.sourceId || !props.sourceUrl) {
+    if (!props.id) {
       return;
     }
     if (props.displayImageUrl) {
@@ -80,9 +74,7 @@ const CompactSuggestionController: FunctionComponent<
     const exec = () =>
       getNodeDisplayImage({
         variables: {
-          id: props.nodeId!,
-          sourceId: props.sourceId!,
-          sourceUrl: props.sourceUrl!,
+          id: props.id!,
         },
       });
 
@@ -95,34 +87,20 @@ const CompactSuggestionController: FunctionComponent<
     // I was defeated by some interaction with the flicking.js library's carousel. All of them
     // reported threshold 1 at all times.
     requestIdleCallback(exec);
-  }, [
-    getNodeDisplayImage,
-    lazy,
-    props.displayImageUrl,
-    props.nodeId,
-    props.sourceId,
-    props.sourceUrl,
-  ]);
+  }, [getNodeDisplayImage, lazy, props.displayImageUrl, props.id]);
 
   // Loads the extended node information to support the focused view
-  const sourcesQuery = useHaloSourcesQuery();
-  const [getNode, nodeQuery] = useHaloNodeLazyQuery();
-  const [getConnectivity, connectivityQuery] = useHaloConnectivityLazyQuery();
+  const [getItem, itemQuery] = useContentItemLazyQuery();
 
   const onFocusIntended: NonNullable<
     CompactSuggestionItemProps["onFocusIntended"]
   > = useCallback(() => {
-    if (!props.nodeId || !props.sourceId || !props.sourceUrl) {
+    if (!props.id) {
       return;
     }
 
-    const sourceArgs = getHaloSourceGraphQLArgs({
-      id: props.sourceId,
-      sourceUrl: props.sourceUrl,
-    });
-    getNode({ variables: { ...sourceArgs, id: props.nodeId! } });
-    getConnectivity({ variables: sourceArgs });
-  }, [getNode, getConnectivity, props.nodeId, props.sourceId, props.sourceUrl]);
+    getItem({ variables: { id: props.id! } });
+  }, [getItem, props.id]);
 
   const onFocusCaptured: NonNullable<
     CompactSuggestionItemProps["onFocusCaptured"]
@@ -145,32 +123,32 @@ const CompactSuggestionController: FunctionComponent<
     }, [animationDuration]);
 
   const [addSavedObject, addSavedObjectMutation] =
-    useHaloAddSourceSavedObjectMutation();
+    useContentAddSavedObjectMutation();
   const [deleteSavedObject, deleteSavedObjectMutation] =
-    useHaloDeleteSourceSavedObjectMutation();
+    useContentDeleteSavedObjectMutation();
 
   const SaveControlInstance = useMemo(() => {
-    const node = nodeQuery.data?.halo.node;
-    const saved: boolean = !!node?.saved;
+    const item = itemQuery.data?.content.item;
+    const saved: boolean = !!item?.saved;
     const onClick: SaveControlProps["onClick"] = async () => {
       const saveAlertDefaults: Pick<
         SaveSnackbarProps,
         "displayImageUrl" | "displayName"
       > = {
-        displayName: node?.displayName,
-        displayImageUrl: node?.displayImageUrl,
+        displayName: item?.displayName,
+        displayImageUrl: item?.displayImageUrl,
       };
 
-      if (node?.saved?.id) {
+      if (item?.saved?.id) {
         return deleteSavedObject({
-          variables: { id: node?.saved?.id },
+          variables: { id: item?.saved?.id },
           onCompleted: () => {
             enqueueSnackbar({
               ...saveAlertDefaults,
               variant: "save",
               action: "removed",
             });
-            nodeQuery.refetch();
+            itemQuery.refetch();
           },
           onError: (error) =>
             enqueueSnackbar({
@@ -182,12 +160,10 @@ const CompactSuggestionController: FunctionComponent<
         });
       }
 
-      if (props.sourceId && node?.id) {
+      if (item?.id) {
         return addSavedObject({
           variables: {
-            objectId: node!.id,
-            objectType: HaloSavedSourceObjectType.HaloNode,
-            sourceId: props.sourceId,
+            objectId: item!.id,
           },
           onCompleted: () => {
             enqueueSnackbar({
@@ -195,7 +171,7 @@ const CompactSuggestionController: FunctionComponent<
               variant: "save",
               action: "saved",
             });
-            nodeQuery.refetch();
+            itemQuery.refetch();
           },
           onError: (error) =>
             enqueueSnackbar({
@@ -210,8 +186,8 @@ const CompactSuggestionController: FunctionComponent<
 
     return (
       <SaveControl
-        disabled={!!nodeQuery.error || !node}
-        loading={nodeQuery.loading}
+        disabled={!!itemQuery.error || !item}
+        loading={itemQuery.loading}
         mutating={
           addSavedObjectMutation.loading || deleteSavedObjectMutation.loading
         }
@@ -225,13 +201,12 @@ const CompactSuggestionController: FunctionComponent<
     addSavedObjectMutation,
     deleteSavedObject,
     deleteSavedObjectMutation,
-    props.sourceId,
-    nodeQuery,
+    itemQuery,
   ]);
 
   const displayImageUrl =
     props.displayImageUrl ||
-    nodeDisplayImageQuery.data?.halo.node.displayImageUrl;
+    nodeDisplayImageQuery.data?.content.item.displayImageUrl;
 
   return (
     <>
@@ -278,11 +253,9 @@ const CompactSuggestionController: FunctionComponent<
             anchorWidth={state.element.clientWidth}
             displayImageUrl={displayImageUrl}
             expanded={state.expanded}
-            connectivityQuery={connectivityQuery}
-            nodeQuery={nodeQuery}
+            itemQuery={itemQuery}
             onDismiss={onDismiss}
             onImageLoaded={onImageLoaded}
-            sourcesQuery={sourcesQuery}
             SaveControl={SaveControlInstance}
           />
         </Popper>

@@ -6,9 +6,17 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Box, Card, Chip, Grid, Link, Skeleton, useTheme } from "@mui/material";
+import {
+  alpha,
+  Box,
+  Card,
+  Grid,
+  keyframes,
+  Link,
+  Rating,
+  useTheme,
+} from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import { ErrorBoundary } from "@torch-ai-internal/react-display-components/lib/components/Feedback/ErrorBoundary/ErrorBoundary";
 import SuggestionContent from "../SuggestionContent/SuggestionContent";
 import SuggestionMedia, {
   SuggestionMediaProps,
@@ -17,18 +25,14 @@ import {
   getSuggestionItemAnimationDuration,
   suggestionCarouselSizes,
 } from "../../SuggestionCarousel.constants";
-import {
-  HaloConnectivityQueryHookResult,
-  HaloNodeQueryHookResult,
-  HaloSourcesQueryHookResult,
-} from "../../../../generated/types";
-import ApolloErrorAlert from "@torch-ai-internal/react-display-components/lib/components/Feedback/ApolloErrorAlert/ApolloErrorAlert";
-import TopicChip from "../../../Topics/TopicChip";
-import { generateDashboardSearchV1Path } from "../../../Dashboard/Router";
+import { generateContentGenreUri } from "../../../Dashboard/Router";
 import { SuggestionItemProps } from "../types";
 import { throttle } from "lodash";
 import { arrowWidth } from "../../../Carousel/components/CarouselArrow/CarouselArrow";
-import EntityRatings from "../../../EntityRatings/EntityRatings";
+import { ErrorBoundary } from "../../../ErrorBoundary/ErrorBoundary";
+import { ContentItemQueryHookResult } from "../../../../generated/types";
+import ApolloErrorAlert from "../../../ApolloErrorAlert/ApolloErrorAlert";
+import GenreChip from "../../../Genres/GenreChip";
 
 export type FocusedSuggestionProps = SuggestionItemProps &
   ExpandedContentProps & {
@@ -162,22 +166,17 @@ const FocusedSuggestion: FunctionComponent<FocusedSuggestionProps> = ({
 export default FocusedSuggestion;
 
 type ExpandedContentProps = {
-  connectivityQuery: HaloConnectivityQueryHookResult;
-  nodeQuery: HaloNodeQueryHookResult;
-  /** A lighter weight source query, we only need the display name and this will be used on many pages anyway. */
-  sourcesQuery: HaloSourcesQueryHookResult;
+  itemQuery: ContentItemQueryHookResult;
   SaveControl: ReactNode;
 };
 const ExpandedContent: FunctionComponent<FocusedSuggestionProps> = ({
-  connectivityQuery,
-  nodeQuery,
-  sourcesQuery,
+  itemQuery,
   SaveControl,
 }) => {
   return (
     <Box m={1}>
-      {nodeQuery.error ? (
-        <ApolloErrorAlert error={nodeQuery.error} />
+      {itemQuery.error ? (
+        <ApolloErrorAlert error={itemQuery.error} />
       ) : (
         <Grid container direction={"column"} gap={1}>
           <Grid
@@ -187,15 +186,10 @@ const ExpandedContent: FunctionComponent<FocusedSuggestionProps> = ({
             alignItems={"center"}
             flexWrap={"nowrap"}
           >
-            <Ratings
-              nodeQuery={nodeQuery}
-              connectivityQuery={connectivityQuery}
-            />
+            <Ratings itemQuery={itemQuery} />
             <div>{SaveControl}</div>
           </Grid>
-          <EcosystemTag nodeQuery={nodeQuery} sourcesQuery={sourcesQuery} />
-          <Topics nodeQuery={nodeQuery} />
-          <ApolloErrorAlert error={connectivityQuery.error} />
+          <Genres itemQuery={itemQuery} />
         </Grid>
       )}
     </Box>
@@ -203,103 +197,59 @@ const ExpandedContent: FunctionComponent<FocusedSuggestionProps> = ({
 };
 
 type RatingsProps = {
-  connectivityQuery: HaloConnectivityQueryHookResult;
-  nodeQuery: HaloNodeQueryHookResult;
+  itemQuery: ContentItemQueryHookResult;
 };
-const Ratings: FunctionComponent<RatingsProps> = ({
-  connectivityQuery,
-  nodeQuery,
-}) => {
-  const node = nodeQuery.data?.halo.node;
-
-  const facts = node?.attributes
-    ? Object.entries(node.attributes).length
-    : undefined;
-  const ltdMaximum =
-    connectivityQuery?.data?.halo.connectivity.entities.at(0)?.score;
-  const ltdScore = node?.id
-    ? connectivityQuery?.data?.halo.connectivity.entities.find(
-        ({ entity }) => entity === node.id,
-      )?.score
-    : undefined;
+const Ratings: FunctionComponent<RatingsProps> = ({ itemQuery }) => {
+  const theme = useTheme();
+  const node = itemQuery.data?.content.item;
 
   return (
-    <EntityRatings
-      centrality={false}
-      loading={nodeQuery.loading || connectivityQuery.loading}
-      facts={facts}
-      ltdRank={{
-        value: ltdScore,
-        maximum: ltdMaximum,
-      }}
+    <Rating
+      value={typeof node?.rating === "number" ? node.rating * 5 : undefined}
+      readOnly
+      sx={[
+        {
+          // https://github.com/mui/material-ui/blob/master/packages/mui-material/src/Skeleton/Skeleton.js
+          "& .MuiRating-icon": {
+            color: alpha(
+              theme.palette.text.primary,
+              theme.palette.mode === "light" ? 0.11 : 0.13,
+            ),
+            animation: `${pulseKeyframe} 2s ease-in-out 0.5s infinite`, // pulse
+          },
+        },
+      ]}
     />
   );
 };
 
-type EcosystemProps = {
-  nodeQuery: HaloNodeQueryHookResult;
-  /** A lighter weight source query, we only need the display name and this will be used on many pages anyway. */
-  sourcesQuery: HaloSourcesQueryHookResult;
-};
-const EcosystemTag: FunctionComponent<EcosystemProps> = ({
-  nodeQuery,
-  sourcesQuery,
-}) => {
-  const sourceDisplayName = nodeQuery.variables?.sourceId
-    ? sourcesQuery.data?.halo.sources.find(
-        (source) => source.id === nodeQuery.variables?.sourceId,
-      )?.displayName
-    : undefined;
-
-  return sourcesQuery.error ? (
-    <ApolloErrorAlert error={sourcesQuery.error} />
-  ) : (
-    <Box>
-      <Chip
-        label={
-          nodeQuery.loading || sourcesQuery.loading ? (
-            <Skeleton width={"12ch"} />
-          ) : (
-            sourceDisplayName
-          )
-        }
-        variant="outlined"
-      />
-    </Box>
-  );
-};
-
-const Topics: FunctionComponent<Pick<FocusedSuggestionProps, "nodeQuery">> = ({
-  nodeQuery,
+const Genres: FunctionComponent<Pick<FocusedSuggestionProps, "itemQuery">> = ({
+  itemQuery,
 }) => {
   const theme = useTheme();
-  const sourceId = nodeQuery.variables?.sourceId;
-  const topics: string[] = nodeQuery.data?.halo.node.attributes.topics ?? [];
+  const genres: string[] = itemQuery.data?.content.item.genres ?? [];
 
   return (
     <>
-      {(nodeQuery.loading || topics.length > 0) && (
+      {(itemQuery.loading || genres.length > 0) && (
         <Grid container direction={"row"} spacing={1}>
-          {nodeQuery.loading ? (
+          {itemQuery.loading ? (
             <Grid item>
-              <TopicChip
+              <GenreChip
                 isLoading={true}
                 color={theme.palette.info.main}
                 score={"*"}
               />
             </Grid>
           ) : (
-            topics?.map((topic) => (
+            genres?.map((topic) => (
               <Grid item key={topic}>
-                <TopicChip
+                <GenreChip
                   text={topic}
                   color={theme.palette.info.main}
                   score={"*"}
                   linkProps={{
-                    to: generateDashboardSearchV1Path(
-                      { query: topic, source: sourceId! },
-                      { exact: "1" },
-                    ),
+                    to: generateContentGenreUri({ id: topic }),
                   }}
                 />
               </Grid>
@@ -310,3 +260,17 @@ const Topics: FunctionComponent<Pick<FocusedSuggestionProps, "nodeQuery">> = ({
     </>
   );
 };
+
+const pulseKeyframe = keyframes`
+0% {
+  opacity: 1;
+}
+
+50% {
+  opacity: 0.4;
+}
+
+100% {
+  opacity: 1;
+}
+`;

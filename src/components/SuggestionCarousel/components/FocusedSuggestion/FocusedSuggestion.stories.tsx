@@ -2,14 +2,13 @@
 
 import type { Meta, StoryObj } from "@storybook/react";
 import FocusedSuggestion, { FocusedSuggestionProps } from "./FocusedSuggestion";
-import { generateDashboardSearchV1Path } from "../../../Dashboard/Router";
-import EntityCategoryIcon from "../../../EntityIcon/EntityCategoryIcon";
-import { HaloEntityCategory } from "../../../../generated/types";
+import { generateContentInfoUri } from "../../../Dashboard/Router";
 import { ApolloError } from "@apollo/client";
 import React from "react";
 import SaveControl from "../../../SaveControl/SaveControl";
+import MovieIcon from "../../../Icons/IconMovie";
+import { ContentItemFormat } from "../../../../generated/types";
 
-const source = "0";
 const id = "singers/1";
 const displayName = "Tester Bennington";
 const displayImageUrl =
@@ -36,67 +35,30 @@ const meta: Meta<typeof FocusedSuggestion> = {
   // More on args: https://storybook.js.org/docs/react/writing-stories/args
   args: {
     anchorWidth: 425,
-    connectivityQuery: {
-      ...queryDefaults,
-      data: {
-        halo: {
-          connectivity: {
-            entities: [
-              { entity: "1", score: 1 },
-              { entity: id, score: 2 },
-              { entity: "3", score: 3 },
-            ],
-          },
-        },
-      },
-    } as FocusedSuggestionProps["connectivityQuery"],
     expanded: true,
-    Icon: <EntityCategoryIcon category={HaloEntityCategory.Person} />,
+    Icon: <MovieIcon />,
     Primary: <>Phoenix, Arizona</>,
     Secondary: <>{displayName}</>,
     displayImageUrl,
     linkProps: {
-      to: generateDashboardSearchV1Path(
-        { query: displayName, source: "0" },
-        { nodeId: id },
-      ),
+      to: generateContentInfoUri({ id: "1234" }),
     },
-    nodeQuery: {
+    itemQuery: {
       ...queryDefaults,
-      variables: {
-        id: id,
-        sourceId: source,
-        sourceUrl: "",
-      },
+      variables: { id: id },
       data: {
-        halo: {
-          node: {
+        content: {
+          item: {
             id: id,
-            entityCategory: "person",
+            format: ContentItemFormat.Movie,
             displayName: displayName,
             displayImageUrl,
-            geometry: null,
-            hidden: false,
-            attributes: {
-              band: "Linkin Park",
-              platinumAlbums: "1,825",
-              topics: ["alternative", "metal"],
-            },
-            __typename: "HaloNode",
+            genres: ["Horror", "Documentry"],
           },
-          __typename: "Halo",
         },
       },
-    } as FocusedSuggestionProps["nodeQuery"],
+    } as FocusedSuggestionProps["itemQuery"],
     SaveControl: <SaveControl saved />,
-    sourcesQuery: {
-      ...queryDefaults,
-      data: {
-        halo: {
-          sources: [{ displayName: "Spotify", id: source }],
-        },
-      },
-    } as FocusedSuggestionProps["sourcesQuery"],
   },
 };
 export default meta;
@@ -110,35 +72,18 @@ export const Primary: Story = {
 
 export const Loading: Story = {
   args: {
-    nodeQuery: {
+    itemQuery: {
       loading: true,
-    } as FocusedSuggestionProps["nodeQuery"],
+    } as FocusedSuggestionProps["itemQuery"],
     SaveControl: <SaveControl loading />,
   },
 };
 
-export const NodeQueryError: Story = {
+export const ItemQueryError: Story = {
   args: {
-    nodeQuery: {
+    itemQuery: {
       error: new ApolloError({ errorMessage: "An unexpected error occurred" }),
-    } as FocusedSuggestionProps["nodeQuery"],
+    } as FocusedSuggestionProps["itemQuery"],
     SaveControl: <SaveControl disabled />,
-  },
-};
-
-export const ConnectivityQueryError: Story = {
-  args: {
-    connectivityQuery: {
-      error: new ApolloError({ errorMessage: "An unexpected error occurred" }),
-    } as FocusedSuggestionProps["connectivityQuery"],
-  },
-};
-
-export const SourcesQueryError: Story = {
-  args: {
-    sourcesQuery: {
-      error: new ApolloError({ errorMessage: "An unexpected error occurred" }),
-    } as FocusedSuggestionProps["sourcesQuery"],
-    SaveControl: <SaveControl loading />,
   },
 };

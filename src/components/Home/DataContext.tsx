@@ -1,8 +1,8 @@
 import React from "react";
-import { HaloSuggestionsQueryHookResult } from "../../generated/types";
+import { ContentSuggestionsQueryHookResult } from "../../generated/types";
 
 export type IDataContext = {
-  suggestionsQuery: HaloSuggestionsQueryHookResult;
+  suggestionsQuery: ContentSuggestionsQueryHookResult;
 };
 
 const DataContext = React.createContext<IDataContext>({} as IDataContext);

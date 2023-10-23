@@ -4,18 +4,18 @@ import CompactSuggestionItem from "../../SuggestionCarousel/components/CompactSu
 import CompactSuggestionController, {
   CompactSuggestionControllerProps,
 } from "../../SuggestionCarousel/components/CompactSuggestionController/CompactSuggestionController";
-import {
-  HaloSuggestionsSetItemFieldsFragment,
-  HaloSuggestionsSetFieldsFragment,
-} from "../../../generated/types";
-import EntityCategoryIcon from "../../EntityIcon/EntityCategoryIcon";
 import { useSuggestionCount } from "../../SuggestionCarousel/hooks/useSuggestionCount";
-import { generateDashboardSearchV1Path } from "../../Dashboard/Router";
+import { generateContentInfoUri } from "../../Dashboard/Router";
+import {
+  ContentSuggestionsSet,
+  ContentSuggestionsSetItemFieldsFragment,
+} from "../../../generated/types";
+import MovieIcon from "../../Icons/IconMovie";
 
 type SuggestionSetProps = {
   lazy?: boolean;
   loading?: boolean;
-  set?: HaloSuggestionsSetFieldsFragment;
+  set?: ContentSuggestionsSet;
 };
 const SuggestionSet: React.FunctionComponent<SuggestionSetProps> = ({
   lazy,
@@ -35,7 +35,7 @@ const SuggestionSet: React.FunctionComponent<SuggestionSetProps> = ({
       title={set?.displayName}
       items={set?.items.map((item, index) => (
         <CompactSuggestionController
-          key={item.nodeId || index}
+          key={item.id || index}
           lazy={
             // Passed from the set so we know not to force preloads on sets too far down on the page
             lazy ||
@@ -51,18 +51,15 @@ const SuggestionSet: React.FunctionComponent<SuggestionSetProps> = ({
 export default SuggestionSet;
 
 const getSuggestionItemProps = (
-  item: HaloSuggestionsSetItemFieldsFragment,
+  item: ContentSuggestionsSetItemFieldsFragment,
 ): CompactSuggestionControllerProps => {
   return {
     ...item,
-    Icon: <EntityCategoryIcon category={item.entityCategory} />,
+    Icon: <MovieIcon />,
     Primary: item.primary,
     Secondary: item.secondary,
     linkProps: {
-      to: generateDashboardSearchV1Path(
-        { query: item.searchId, source: item.sourceId },
-        { nodeId: item.nodeId, exact: "1" },
-      ),
+      to: generateContentInfoUri({ id: item.id }),
     },
   };
 };

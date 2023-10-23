@@ -8,7 +8,6 @@ import React, {
 } from "react";
 import { Card, Link, useTheme } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
-import { ErrorBoundary } from "@torch-ai-internal/react-display-components/lib/components/Feedback/ErrorBoundary/ErrorBoundary";
 import {
   getSuggestionItemAnimationDuration,
   suggestionCarouselSizes,
@@ -20,6 +19,7 @@ import SuggestionMedia, {
 } from "../SuggestionMedia/SuggestionMedia";
 import { SuggestionItemProps } from "../types";
 import { throttle } from "lodash";
+import { ErrorBoundary } from "../../../ErrorBoundary/ErrorBoundary";
 
 export type CompactSuggestionItemProps = SuggestionItemProps & {
   loading?: boolean;

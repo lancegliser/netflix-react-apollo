@@ -9,7 +9,6 @@ import React, {
 import Flicking, { FlickingProps, ViewportSlot } from "@egjs/react-flicking";
 import "@egjs/react-flicking/dist/flicking.css";
 import { useTheme } from "@mui/material";
-import { ErrorBoundary } from "@torch-ai-internal/react-display-components/lib/components/Feedback/ErrorBoundary/ErrorBoundary";
 import { Arrow as ArrowPlugin } from "@egjs/flicking-plugins";
 import Arrow, {
   nextArrowClassName,
@@ -17,6 +16,7 @@ import Arrow, {
 } from "./components/CarouselArrow/CarouselArrow";
 import { DIRECTION } from "@egjs/flicking/src/const/external";
 import { Plugin } from "@egjs/flicking";
+import { ErrorBoundary } from "../ErrorBoundary/ErrorBoundary";
 
 export type CarouselProps = {
   arrows?: {

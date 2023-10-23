@@ -2,6 +2,13 @@
 import { alpha, lighten, Theme } from "@mui/material";
 import { deepmerge } from "@mui/utils";
 
+declare module "@mui/material/styles" {
+  interface BreakpointOverrides {
+    xxl: true;
+    xxxl: true;
+  }
+}
+
 const h1FontSizeUnits = 6;
 const h2FontSizeUnits = 3.75;
 const h3FontSizeUnits = 3;

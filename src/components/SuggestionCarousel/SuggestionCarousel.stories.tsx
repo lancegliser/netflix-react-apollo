@@ -7,21 +7,15 @@ import CompactSuggestionItem from "./components/CompactSuggestionItem/CompactSug
 import CompactSuggestionController, {
   CompactSuggestionControllerProps,
 } from "./components/CompactSuggestionController/CompactSuggestionController";
-import EntityCategoryIcon from "../EntityIcon/EntityCategoryIcon";
-import { HaloEntityCategory } from "../../generated/types";
-import { generateDashboardSearchV1Path } from "../Dashboard/Router";
+import { generateContentInfoUri } from "../Dashboard/Router";
 
 const controllerDefaults: CompactSuggestionControllerProps = {
-  Icon: <EntityCategoryIcon category={HaloEntityCategory.Person} />,
   Primary: <>Phoenix, Arizona</>,
   Secondary: <>Tester Bennington</>,
   displayImageUrl:
     "https://miro.medium.com/v2/resize:fit:2000/format:webp/1*wFRSaIty-3Ogkl7yHYOaQg.jpeg",
   linkProps: {
-    to: generateDashboardSearchV1Path(
-      { query: "Tester Bennington", source: "0" },
-      { nodeId: "singers/1" },
-    ),
+    to: generateContentInfoUri({ id: "1234" }),
   },
   lazy: false,
 };
