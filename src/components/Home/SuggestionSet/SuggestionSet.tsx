@@ -7,7 +7,7 @@ import CompactSuggestionController, {
 import { useSuggestionCount } from "../../SuggestionCarousel/hooks/useSuggestionCount";
 import { generateContentInfoUri } from "../../Content/Router";
 import {
-  ContentSuggestionsSet,
+  ContentSuggestionsSetFieldsFragment,
   ContentSuggestionsSetItemFieldsFragment,
 } from "../../../generated/types";
 import MovieIcon from "../../Icons/IconMovie";
@@ -15,7 +15,7 @@ import MovieIcon from "../../Icons/IconMovie";
 type SuggestionSetProps = {
   lazy?: boolean;
   loading?: boolean;
-  set?: ContentSuggestionsSet;
+  set?: ContentSuggestionsSetFieldsFragment;
 };
 const SuggestionSet: React.FunctionComponent<SuggestionSetProps> = ({
   lazy,
