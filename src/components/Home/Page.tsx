@@ -1,12 +1,14 @@
-import React from "react";
-import logo from "./logo.svg";
-import "./Home.css";
+import React, { FunctionComponent, useContext } from "react";
 import { Helmet } from "react-helmet-async";
 import { routeHomeTitle } from "./Router";
 import App from "../App/App";
 import { getMetaTitle } from "../../utils/meta";
-import { generateUsersSearchPath } from "../Users/Router";
-import { Link } from "react-router-dom";
+import { Grid } from "@mui/material";
+import { ErrorBoundary } from "../ErrorBoundary/ErrorBoundary";
+import { DataContextProvider } from "./DataContextProvider";
+import DataContext from "./DataContext";
+import ApolloErrorAlert from "../ApolloErrorAlert/ApolloErrorAlert";
+import SuggestionSet from "./SuggestionSet/SuggestionSet";
 
 const Page: React.FunctionComponent = () => {
   return (
@@ -15,20 +17,53 @@ const Page: React.FunctionComponent = () => {
         <title>{getMetaTitle([routeHomeTitle])}</title>
       </Helmet>
       <App>
-        <main className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload.
-          </p>
-
-          <Link className="App-link" to={usersPath}>
-            Learn React and Apollo client
-          </Link>
-        </main>
+        <ErrorBoundary>
+          <DataContextProvider>
+            <Contents />
+          </DataContextProvider>
+        </ErrorBoundary>
       </App>
     </>
   );
 };
 export default Page;
 
-const usersPath = generateUsersSearchPath();
+const Contents: FunctionComponent = () => {
+  const { suggestionsQuery } = useContext(DataContext);
+
+  return (
+    <Grid container direction={"column"} gap={3} pt={8} component={"main"}>
+      {suggestionsQuery.error ? (
+        <ApolloErrorAlert error={suggestionsQuery.error} />
+      ) : (
+        <>
+          {/*<Featured />*/}
+          <Grid container direction={"column"} gap={2}>
+            <SuggestionSet
+              loading={suggestionsQuery.loading}
+              set={suggestionsQuery.data?.content.suggestions.saved}
+            />
+            <SuggestionSet
+              loading={suggestionsQuery.loading}
+              set={suggestionsQuery.data?.content.suggestions.recent}
+            />
+            {/*<Promoted />*/}
+            {suggestionsQuery.loading ? (
+              <>
+                <SuggestionSet loading />
+                <SuggestionSet loading />
+                <SuggestionSet loading />
+              </>
+            ) : (
+              suggestionsQuery.data?.content.suggestions.dynamic.map(
+                (set, index) => (
+                  <SuggestionSet key={index} set={set} lazy={index >= 2} />
+                ),
+              )
+            )}
+          </Grid>
+        </>
+      )}
+    </Grid>
+  );
+};

@@ -1,0 +1,99 @@
+query ContentSuggestions($limit: Int, $preload: Int, $preloadLast: Boolean) {
+  content {
+    suggestions(limit: $limit, preload: $preload, preloadLast: $preloadLast) {
+      ...ContentSuggestionsFields
+    }
+  }
+}
+fragment ContentSuggestionsFields on ContentSuggestions {
+  dynamic {
+    ...ContentSuggestionsSetFields
+  }
+  recent {
+    ...ContentSuggestionsSetFields
+  }
+  saved {
+    ...ContentSuggestionsSetFields
+  }
+}
+
+fragment ContentSuggestionsSetFields on ContentSuggestionsSet {
+  displayName
+  items {
+    ...ContentSuggestionsSetItemFields
+  }
+}
+
+fragment ContentSuggestionsSetItemFields on ContentSuggestionsItem {
+  displayImageUrl
+  id
+  primary
+  secondary
+}
+#
+
+query ContentItemDisplayImageUrl($id: ID!) {
+  content {
+    item(id: $id) {
+      id
+      displayImageUrl
+    }
+  }
+}
+
+query ContentItem($id: ID!) {
+  content {
+    item(id: $id) {
+      ...ContentItemFields
+    }
+  }
+}
+
+query ContentItems($ids: [ID!]!) {
+  content {
+    items(ids: $ids) {
+      ...ContentItemFields
+    }
+  }
+}
+
+fragment ContentItemFields on ContentItem {
+  displayImageUrl
+  id
+  displayName
+  format
+  genres
+  rating
+  saved {
+    ...SavedRecordFields
+  }
+}
+
+fragment ContentAccessRecordFields on AccessRecord {
+  #  id This is being excluded to avoid the Apollo client caching responses.
+  objectType
+  objectId
+  timestamp
+}
+
+mutation ContentAddSavedObject($objectId: String!) {
+  content {
+    addSavedItem(objectId: $objectId) {
+      ...SavedRecordFields
+    }
+  }
+}
+
+mutation ContentDeleteSavedObject($id: ID!) {
+  content {
+    deleteSavedObject(id: $id) {
+      ...SavedRecordFields
+    }
+  }
+}
+
+fragment SavedRecordFields on SavedRecord {
+  id
+  objectType
+  objectId
+}

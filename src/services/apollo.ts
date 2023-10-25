@@ -51,6 +51,7 @@ const cache = new InMemoryCache({
       fields: {
         // Merge our namespaces
         users: { merge: true },
+        content: { merge: true },
       },
     },
     UsersQuery: {

@@ -1,38 +1,13 @@
-import React, { ReactNode, useState } from "react";
+import React from "react";
+import { Theme } from "@mui/material";
 
-export interface IThemeContext {
-  isColorSchemeLight: boolean;
-  toggleColorScheme(): IThemeContext;
+export interface IThemesContext {
+  theme: Theme;
+  themes: Theme[];
+  setTheme: (theme: Theme) => void;
 }
 
-export const themeDefaults: IThemeContext = {
-  isColorSchemeLight: true,
-  toggleColorScheme: () => themeDefaults,
-};
+const ThemesContext = React.createContext<IThemesContext>({} as IThemesContext);
+ThemesContext.displayName = "ThemesContext";
 
-const ThemeContext = React.createContext<IThemeContext>(themeDefaults);
-ThemeContext.displayName = "ThemeContext";
-export default ThemeContext;
-
-export interface ProviderProps {
-  children: ReactNode;
-}
-export const ThemeContextProvider: React.FunctionComponent<ProviderProps> = (
-  props,
-) => {
-  const [state, setState] = useState(themeDefaults);
-  const context: IThemeContext = {
-    ...state,
-
-    toggleColorScheme: (): IThemeContext => {
-      setState({ ...state, isColorSchemeLight: !context.isColorSchemeLight });
-      return context;
-    },
-  };
-
-  return (
-    <ThemeContext.Provider value={context}>
-      {props.children}
-    </ThemeContext.Provider>
-  );
-};
+export default ThemesContext;
