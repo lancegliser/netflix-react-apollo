@@ -1,7 +1,7 @@
 import {
   FunctionComponent,
   useCallback,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useReducer,
   useState,
@@ -63,31 +63,46 @@ const CompactSuggestionController: FunctionComponent<
       fetchPolicy: "no-cache",
     });
 
-  useEffect(() => {
-    if (!props.id) {
-      return;
-    }
-    if (props.displayImageUrl) {
-      return;
-    }
+  const intersectionObserver = useMemo(
+    () =>
+      new IntersectionObserver(
+        (entries, observer) => {
+          if (!entries.at(0)?.isIntersecting) {
+            return;
+          }
+          observer.disconnect();
 
-    const exec = () =>
-      getNodeDisplayImage({
-        variables: {
-          id: props.id!,
+          if (
+            // Already included, skip it
+            props.displayImageUrl ||
+            // Nothing to request, skip it
+            !props.id
+          ) {
+            return;
+          }
+
+          getNodeDisplayImage({
+            variables: { id: props.id! },
+          });
         },
-      });
+        {
+          rootMargin: "-30px 0px 0px -30px",
+          threshold: 0.02,
+        },
+      ),
 
-    if (!lazy) {
-      exec();
+    [getNodeDisplayImage, props.displayImageUrl, props.id],
+  );
+  useLayoutEffect(() => {
+    if (!element) {
       return;
     }
 
-    // To save someone the trouble later. I attempted to use IntersectionObserver to load on demand.
-    // I was defeated by some interaction with the flicking.js library's carousel. All of them
-    // reported threshold 1 at all times.
-    requestIdleCallback(exec);
-  }, [getNodeDisplayImage, lazy, props.displayImageUrl, props.id]);
+    intersectionObserver.observe(element);
+    return () => {
+      intersectionObserver.disconnect();
+    };
+  }, [intersectionObserver, element]);
 
   // Loads the extended node information to support the focused view
   const [getItem, itemQuery] = useContentItemLazyQuery();
